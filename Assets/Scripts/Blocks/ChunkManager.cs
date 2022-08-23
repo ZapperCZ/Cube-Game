@@ -3,11 +3,25 @@ using UnityEngine;
 
 public class ChunkManager : MonoBehaviour
 {
+    public static ChunkManager Instance { get; private set; }
+
     [SerializeField] int renderDistance = 6;                    //How many chunks should render near the player
     [SerializeField] List<Chunk> chunks = new List<Chunk>();    //List of all chunks in the level
     [SerializeField] GameObject DebugBlock;
     public List<Chunk> ActiveChunks = new List<Chunk>();        //List of all the currently loaded chunks
 
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)   //There already exists an instance of this manager
+        {
+            Destroy(this);  //Destroy the new instance (this one)
+            return;         //Stop further code execution
+        }
+        else
+        {
+            Instance = this;    //No instance exists yet, set the instance reference to this one
+        }
+    }
     private void Start()
     {
         ManuallyPopulateChunks();
