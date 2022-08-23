@@ -12,6 +12,10 @@ public class ChunkManager : MonoBehaviour
         ManuallyPopulateChunks();
         foreach(Chunk c in chunks)
         {
+            GameObject g = new GameObject();
+            g.transform.name = "Chunk " + chunks.IndexOf(c);
+            g.transform.parent = transform;
+            g.transform.position = c.ChunkPosition;
             Debug.Log(c.ChunkPosition);
         }
         LoadNearbyChunks();
@@ -26,14 +30,14 @@ public class ChunkManager : MonoBehaviour
                     continue;           //Skip the middle - a rigid platform is in place instead
 
                 Chunk newChunk = new Chunk();
-                newChunk.ChunkPosition = new Vector3(i * 32, j * 32, 0);
+                newChunk.ChunkPosition = new Vector3(i * 32, 0, j * 32);
 
                 //Create a stone layer in the middle of the chunk
                 for(int x = 0; x < newChunk.ChunkBlockIDs.GetLength(0); x++)
                 {
-                    for (int y = 0; y < newChunk.ChunkBlockIDs.GetLength(1); y++)
+                    for (int z = 0; z < newChunk.ChunkBlockIDs.GetLength(2); z++)
                     {
-                        newChunk.ChunkBlockIDs[x, y, (newChunk.ChunkBlockIDs.GetLength(2)) / 2] = 1;
+                        newChunk.ChunkBlockIDs[x, (newChunk.ChunkBlockIDs.GetLength(1)) / 2, z] = 1;
                     }
                 }
                 chunks.Add(newChunk);
