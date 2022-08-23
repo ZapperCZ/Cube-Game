@@ -5,6 +5,7 @@ public class ChunkManager : MonoBehaviour
 {
     [SerializeField] int renderDistance = 6;                    //How many chunks should render near the player
     [SerializeField] List<Chunk> chunks = new List<Chunk>();    //List of all chunks in the level
+    [SerializeField] GameObject DebugBlock;
     public List<Chunk> ActiveChunks = new List<Chunk>();        //List of all the currently loaded chunks
 
     private void Start()
@@ -16,7 +17,22 @@ public class ChunkManager : MonoBehaviour
             g.transform.name = "Chunk " + chunks.IndexOf(c);
             g.transform.parent = transform;
             g.transform.position = c.ChunkPosition;
-            Debug.Log(c.ChunkPosition);
+            for(int x = 0; x < c.ChunkBlockIDs.GetLength(0); x++)
+            {
+                for (int y = 0; y < c.ChunkBlockIDs.GetLength(1); y++)
+                {
+                    for (int z = 0; z < c.ChunkBlockIDs.GetLength(2); z++)
+                    {
+                        if(c.ChunkBlockIDs[x,y,z] == 1)
+                        {
+                            GameObject newCube = GameObject.Instantiate(DebugBlock);
+                            newCube.transform.parent = g.transform;
+                            newCube.transform.position = GetBlockPosition(chunks.IndexOf(c), new Vector3(x, y, z));
+                        }
+                    }
+                }
+            }
+            //Debug.Log(c.ChunkPosition);
         }
         LoadNearbyChunks();
     }
@@ -26,8 +42,8 @@ public class ChunkManager : MonoBehaviour
         {
             for(int j = -1; j <= 1; j++)
             {
-                if (i == 0 && j == 0)
-                    continue;           //Skip the middle - a rigid platform is in place instead
+                //if (i == 0 && j == 0)
+                    //continue;           //Skip the middle - a rigid platform is in place instead
 
                 Chunk newChunk = new Chunk();
                 newChunk.ChunkPosition = new Vector3(i * 32, 0, j * 32);
@@ -88,7 +104,8 @@ public class ChunkManager : MonoBehaviour
     }
     public Vector3 GetBlockPosition(int chunkID, Vector3 blockCoordinates) //Returns global coordinates of a block in a chunk at the specified coordinates
     {
-        Vector3 blockPosition = blockCoordinates + chunks[chunkID].ChunkPosition;
+        Chunk blockChunk = chunks[chunkID];
+        Vector3 blockPosition = blockCoordinates + blockChunk.ChunkPosition - new Vector3(blockChunk.ChunkBlockIDs.GetLength(0)/2, chunks[chunkID].ChunkBlockIDs.GetLength(1)/2, blockChunk.ChunkBlockIDs.GetLength(2) / 2);     //Vertical offset to make the middle of the array sit at 0 vertical
         return blockPosition;
     }
 }
