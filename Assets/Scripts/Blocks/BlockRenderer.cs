@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BlockRenderer : MonoBehaviour
@@ -9,6 +10,44 @@ public class BlockRenderer : MonoBehaviour
     void Awake()
     {
         LoadAvailableBlocks();
+        TestMeshGeneration();
+        GenerateChunkMesh();
+    }
+    void TestMeshGeneration()
+    {
+        int blockID = 1;
+        List<Vector3> tempVertices;
+        int[] faceTris;
+        GameObject generatedCube = new GameObject();
+        generatedCube.transform.position = new Vector3(0, 5, 0);
+        generatedCube.name = "Cube";
+        for (int i = 0; i < blockSides.GetLength(1); i++)
+        {
+            tempVertices = new List<Vector3>();
+            faceTris = blockSides[blockID - 1, i].triangles.ToArray();
+            GameObject cubeFace = new GameObject();
+            Mesh faceMesh = new Mesh();
+
+            cubeFace.name = "Face " + i;
+            cubeFace.transform.parent = generatedCube.transform;
+            cubeFace.transform.localPosition = Vector3.zero;
+            cubeFace.AddComponent<MeshFilter>();
+            cubeFace.AddComponent<MeshRenderer>();
+            cubeFace.GetComponent<MeshRenderer>().material = ((GameObject)blocks[blockID - 1]).GetComponent<MeshRenderer>().sharedMaterial;
+            for(int j = 0; j < faceTris.Length; j++)
+            {
+                tempVertices.Add(((GameObject)blocks[blockID - 1]).GetComponent<MeshFilter>().sharedMesh.vertices[faceTris[j]]);
+                faceTris[j] = j;
+            }
+            faceMesh.vertices = tempVertices.ToArray();
+            faceMesh.triangles = faceTris;
+            faceMesh.RecalculateNormals();
+            cubeFace.GetComponent<MeshFilter>().mesh = faceMesh;
+        }
+    }
+    void GenerateChunkMesh()
+    {
+
     }
     void LoadAvailableBlocks()  //Load all the existing block prefabs
     {
