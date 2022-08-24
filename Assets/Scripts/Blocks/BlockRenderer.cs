@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BlockRenderer : MonoBehaviour
@@ -15,6 +14,7 @@ public class BlockRenderer : MonoBehaviour
     {
         blocks = Resources.LoadAll("Blocks",typeof(GameObject));
         blockSides = new BlockSide[blocks.Length, 6]; //Each block has 6 possible directions its normals can face
+
         Mesh blockMesh;
         Vector3 point1, point2, point3;
 
@@ -22,7 +22,6 @@ public class BlockRenderer : MonoBehaviour
         {
             blockMesh = block.GetComponent<MeshFilter>().sharedMesh;
             triangleNormals = new Vector3[blockMesh.triangles.Length/3];
-            Debug.Log("Block ID - " + block.GetComponent<BlockProperties>().ID);
 
             //Get triangle normals
             for (int i = 0; i < triangleNormals.Length; i++)
@@ -34,6 +33,32 @@ public class BlockRenderer : MonoBehaviour
 
                 //Calculate the triangle normal
                 triangleNormals[i] = (point1 + point2 + point3) / 3;
+            }
+
+            //Separate the triangles
+            int[] tempIndex;
+            int y = 0;
+            for (int i = -1; i <= 1; i += 2)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    tempIndex = new int[3];
+                    tempIndex[j] = i;
+                    Vector3 currentSide = new Vector3(tempIndex[0], tempIndex[1], tempIndex[2]);
+                    y = ((int)(i / 2f + 0.5f) * 3) + j;
+
+                    blockSides[System.Array.IndexOf(blocks, block), y] = new BlockSide();
+
+                    for (int k = 0; k < triangleNormals.Length; k++)
+                    {
+                        if (triangleNormals[k] == currentSide)
+                        {
+                            blockSides[System.Array.IndexOf(blocks, block), y].triangles.Add(blockMesh.triangles[k * 3]);
+                            blockSides[System.Array.IndexOf(blocks, block), y].triangles.Add(blockMesh.triangles[k * 3 + 1]);
+                            blockSides[System.Array.IndexOf(blocks, block), y].triangles.Add(blockMesh.triangles[k * 3 + 2]);
+                        }
+                    }
+                }
             }
         }
     }
