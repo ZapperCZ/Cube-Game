@@ -3,12 +3,18 @@ using UnityEngine;
 
 public class ChunkManager : MonoBehaviour
 {
-    public static ChunkManager Instance { get; private set; }
+    public static ChunkManager Instance { get; private set; }   //The Singleton Instance of this script
 
-    [SerializeField] int renderDistance = 6;                    //How many chunks should render near the player
+    [SerializeField] float chunkUpdateInterval = 5;             //How often should the ActiveChunk list be updated (in seconds)
+    [SerializeField] int renderDistance = 6;                    //How many chunks should render near the player - number determines how many chunks away the player can see
     [SerializeField] List<Chunk> chunks = new List<Chunk>();    //List of all chunks in the level
     [SerializeField] GameObject DebugBlock;
+    [SerializeField] GameObject Player;                         //The active player character
     public List<Chunk> ActiveChunks = new List<Chunk>();        //List of all the currently loaded chunks
+    public bool PlayerMoved = false;
+
+    Chunk lastPlayerChunk = null;
+    float timer = 0;
 
     private void Awake()
     {
@@ -24,19 +30,25 @@ public class ChunkManager : MonoBehaviour
     }
     private void Start()
     {
-        ManuallyPopulateChunks();
+        ManuallyPopulateChunks();       //Create the chunks and populate them with virtual blocks
+
+        //Temporary code for visible block generation
         foreach(Chunk c in chunks)
         {
+            //Create a chunk object
             GameObject g = new GameObject();
             g.transform.name = "Chunk " + chunks.IndexOf(c);
             g.transform.parent = transform;
             g.transform.position = c.ChunkPosition;
+
+            //Iterate the virtual chunk
             for(int x = 0; x < c.ChunkBlockIDs.GetLength(0); x++)
             {
                 for (int y = 0; y < c.ChunkBlockIDs.GetLength(1); y++)
                 {
                     for (int z = 0; z < c.ChunkBlockIDs.GetLength(2); z++)
                     {
+                        //Instantiate blocks where virtual blocks are present
                         if(c.ChunkBlockIDs[x,y,z] == 1)
                         {
                             GameObject newCube = GameObject.Instantiate(DebugBlock);
@@ -46,21 +58,27 @@ public class ChunkManager : MonoBehaviour
                     }
                 }
             }
-            //Debug.Log(c.ChunkPosition);
         }
         LoadNearbyChunks();
     }
+    void Update()
+    {
+        timer += Time.deltaTime;
+        if(timer > chunkUpdateInterval)
+        {
+            timer = 0;
+            LoadNearbyChunks();
+        }
+    }
     void ManuallyPopulateChunks()   //A debug method to manually create chunks and add blocks into them
     {
+        //Create a 3x3 chunk grid with the center one being at [0;0;0]
         for(int i = -1; i <= 1; i++)
         {
             for(int j = -1; j <= 1; j++)
             {
-                //if (i == 0 && j == 0)
-                    //continue;           //Skip the middle - a rigid platform is in place instead
-
                 Chunk newChunk = new Chunk();
-                newChunk.ChunkPosition = new Vector3(i * 32, 0, j * 32);
+                newChunk.ChunkPosition = new Vector3(i * newChunk.ChunkBlockIDs.GetLength(0), 0, j * newChunk.ChunkBlockIDs.GetLength(2));
 
                 //Create a stone layer in the middle of the chunk
                 for(int x = 0; x < newChunk.ChunkBlockIDs.GetLength(0); x++)
@@ -74,19 +92,52 @@ public class ChunkManager : MonoBehaviour
             }
         }
     }
-    void LoadNearbyChunks() //Loads nearby chunks
+    void LoadNearbyChunks() //Loads nearby chunks and unloads the far away ones
     {
+        Chunk playerChunk = GetChunkAtPosition(Player.transform.position);      //The Chunk that the player is currently located in
+        Chunk chunkToLoad;
+        int chunkWidth = playerChunk.ChunkBlockIDs.GetLength(0);
+        if (playerChunk == lastPlayerChunk)         //The player hasn't moved from the current chunk since the last update, there is no need to laod the chunks again
+        {
+            PlayerMoved = false;
+            return;
+        }
+        PlayerMoved = true;
 
-    }
-    void UnloadChunks()     //Unloads all the chunks
-    {
-        
+        //Load the chunks that are nearby
+        //TODO: Optimize the radius creation. Currently a square is loaded and then cut down to a circle - more efficient would be to first unload the chunks and then load the circle directly
+        for(int i = ((int)playerChunk.ChunkPosition.x) - (chunkWidth * renderDistance); i <= ((int)playerChunk.ChunkPosition.x) + (chunkWidth * renderDistance); i += chunkWidth)
+        {
+            for(int j = ((int)playerChunk.ChunkPosition.y) - (chunkWidth * renderDistance); j <= ((int)playerChunk.ChunkPosition.y) + (chunkWidth * renderDistance); j += chunkWidth)
+            {
+                chunkToLoad = GetChunkAtPosition(new Vector3(i, 0, j));
+                if (!ActiveChunks.Contains(chunkToLoad))
+                {
+                    ActiveChunks.Add(chunkToLoad);
+                }
+            }
+        }
+
+        //Unload the chunks that are far away
+        //Iterate the list backwards to remove from it while looping
+        for (int i = ActiveChunks.Count - 1; i >= 0; i--)
+        {
+            if (Vector3.Distance(ActiveChunks[i].ChunkPosition, Player.transform.position) > chunkWidth * renderDistance)
+            {
+                ActiveChunks.RemoveAt(i);
+            }
+        }
+
+        foreach(Chunk c in ActiveChunks)
+        {
+            Debug.Log(chunks.IndexOf(c));
+        }
     }
     public Chunk GetChunkAtPosition(Vector3 position)  //Returns the chunk that is closest to the input position
     {
         Chunk closestChunk = null;
         float currentDistance, lastDistance;
-        lastDistance = 0;
+        lastDistance = int.MaxValue;
         foreach (Chunk c in chunks)
         {
             currentDistance = Vector3.Distance(position, c.ChunkPosition);      //cache the calculated distance to offload work from the cpu
