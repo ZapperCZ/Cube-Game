@@ -127,11 +127,12 @@ public class ChunkManager : MonoBehaviour
                 ActiveChunks.RemoveAt(i);
             }
         }
-
+        /*
         foreach(Chunk c in ActiveChunks)
         {
             Debug.Log(chunks.IndexOf(c));
         }
+        */
     }
     public Chunk GetChunkAtPosition(Vector3 position)  //Returns the chunk that is closest to the input position
     {
