@@ -33,7 +33,7 @@ public class ChunkManager : MonoBehaviour
         ManuallyPopulateChunks();       //Create the chunks and populate them with virtual blocks
 
         //Temporary code for visible block generation
-        foreach(Chunk c in chunks)
+        foreach (Chunk c in chunks)
         {
             //Create a chunk object
             GameObject g = new GameObject();
@@ -42,14 +42,14 @@ public class ChunkManager : MonoBehaviour
             g.transform.position = c.ChunkPosition;
 
             //Iterate the virtual chunk
-            for(int x = 0; x < c.ChunkBlockIDs.GetLength(0); x++)
+            for (int x = 0; x < c.ChunkBlockIDs.GetLength(0); x++)
             {
                 for (int y = 0; y < c.ChunkBlockIDs.GetLength(1); y++)
                 {
                     for (int z = 0; z < c.ChunkBlockIDs.GetLength(2); z++)
                     {
                         //Instantiate blocks where virtual blocks are present
-                        if(c.ChunkBlockIDs[x,y,z] == 1)
+                        if (c.ChunkBlockIDs[x, y, z] == 1)
                         {
                             GameObject newCube = GameObject.Instantiate(DebugBlock);
                             newCube.transform.parent = g.transform;
@@ -73,15 +73,15 @@ public class ChunkManager : MonoBehaviour
     void ManuallyPopulateChunks()   //A debug method to manually create chunks and add blocks into them
     {
         //Create a 3x3 chunk grid with the center one being at [0;0;0]
-        for(int i = -1; i <= 1; i++)
+        for (int i = -1; i <= 1; i++)
         {
-            for(int j = -1; j <= 1; j++)
+            for (int j = -1; j <= 1; j++)
             {
                 Chunk newChunk = new Chunk();
                 newChunk.ChunkPosition = new Vector3(i * newChunk.ChunkBlockIDs.GetLength(0), 0, j * newChunk.ChunkBlockIDs.GetLength(2));
 
                 //Create a stone layer in the middle of the chunk
-                for(int x = 0; x < newChunk.ChunkBlockIDs.GetLength(0); x++)
+                for (int x = 0; x < newChunk.ChunkBlockIDs.GetLength(0); x++)
                 {
                     for (int z = 0; z < newChunk.ChunkBlockIDs.GetLength(2); z++)
                     {
@@ -106,9 +106,9 @@ public class ChunkManager : MonoBehaviour
 
         //Load the chunks that are nearby
         //TODO: Optimize the radius creation. Currently a square is loaded and then cut down to a circle - more efficient would be to first unload the chunks and then load the circle directly
-        for(int i = ((int)playerChunk.ChunkPosition.x) - (chunkWidth * renderDistance); i <= ((int)playerChunk.ChunkPosition.x) + (chunkWidth * renderDistance); i += chunkWidth)
+        for (int i = ((int)playerChunk.ChunkPosition.x) - (chunkWidth * renderDistance); i <= ((int)playerChunk.ChunkPosition.x) + (chunkWidth * renderDistance); i += chunkWidth)
         {
-            for(int j = ((int)playerChunk.ChunkPosition.y) - (chunkWidth * renderDistance); j <= ((int)playerChunk.ChunkPosition.y) + (chunkWidth * renderDistance); j += chunkWidth)
+            for (int j = ((int)playerChunk.ChunkPosition.y) - (chunkWidth * renderDistance); j <= ((int)playerChunk.ChunkPosition.y) + (chunkWidth * renderDistance); j += chunkWidth)
             {
                 chunkToLoad = GetChunkAtPosition(new Vector3(i, 0, j));
                 if (!ActiveChunks.Contains(chunkToLoad))
