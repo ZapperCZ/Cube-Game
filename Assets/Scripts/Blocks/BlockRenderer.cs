@@ -3,15 +3,16 @@ using UnityEngine;
 
 public class BlockRenderer : MonoBehaviour
 {
-    ChunkManager ChunkManagerInstance = ChunkManager.Instance;
+    ChunkManager ChunkManagerInstance;
     Object[] blocks;
     BlockSide[,] blockSides;    //An array containing the side information of all blocks
     Vector3[] triangleNormals;
-    void Awake()
+    void Start()
     {
+        ChunkManagerInstance = ChunkManager.Instance;
         LoadAvailableBlocks();
         TestMeshGeneration();
-        GenerateChunkMesh();
+        //GenerateChunkMesh();
     }
     void TestMeshGeneration()
     {
@@ -100,5 +101,13 @@ public class BlockRenderer : MonoBehaviour
                 }
             }
         }
+    }
+    bool IsInBounds(int[,,] arrayToCheck, Vector3Int positionToCheck)
+    {
+        bool result = false;
+        result = (positionToCheck.x >= 0 && positionToCheck.x < arrayToCheck.GetLength(0)) &&
+                (positionToCheck.y >= 0 && positionToCheck.y < arrayToCheck.GetLength(1)) &&
+                (positionToCheck.z >= 0 && positionToCheck.z < arrayToCheck.GetLength(2));
+        return result;
     }
 }
