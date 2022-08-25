@@ -3,18 +3,43 @@ using UnityEngine;
 
 public class BlockRenderer : MonoBehaviour
 {
-    ChunkManager ChunkManagerInstance;
+    ChunkManager chunkManagerInstance;
     Object[] blocks;
     BlockSide[,] blockSides;    //An array containing the side information of all blocks
     Vector3[] triangleNormals;
     void Start()
     {
-        ChunkManagerInstance = ChunkManager.Instance;
+        chunkManagerInstance = ChunkManager.Instance;
         LoadAvailableBlocks();
-        //TestMeshGeneration();
-        GenerateChunkMesh();
+        //Test2DMeshGeneration();
+        //Test3DMeshGeneration();
+        //GenerateChunkMesh();
     }
-    void TestMeshGeneration()
+    void Test3DMeshGeneration()
+    {
+        int blockID = 1;
+        GameObject cube = new GameObject();
+        cube.AddComponent<MeshRenderer>();
+        cube.AddComponent<MeshFilter>();
+        cube.GetComponent<MeshRenderer>().material = ((GameObject)blocks[blockID - 1]).GetComponent<MeshRenderer>().sharedMaterial;
+        Mesh cubeMesh = new Mesh();
+        Vector3 point1 = new Vector3(-0.5f, -0.5f, -0.5f);
+        Vector3 point2 = new Vector3(0.5f, -0.5f, -0.5f);
+        Vector3 point3 = new Vector3(-0.5f, 0.5f, -0.5f);
+        Vector3 point4 = new Vector3(-0.5f, -0.5f, 0.5f);
+        Vector3 point5 = new Vector3(-0.5f, 0.5f,0.5f);
+        Vector3 point6 = new Vector3(0.5f, -0.5f, 0.5f);
+        Vector3 point7 = new Vector3(0.5f, 0.5f, -0.5f);
+        Vector3 point8 = new Vector3(0.5f, 0.5f, 0.5f);
+        Vector3[] vertices = { point1, point2, point3, point4, point5, point6, point7, point8 };
+        //int[] triangles = { 2, 6, 7, 7, 4, 2, 6, 1, 5, 5, 7, 6, 2, 0, 1, 1, 6, 2, 7, 5, 3, 3, 4, 7, 1, 0, 3, 3, 5, 1, 0, 2, 4, 4, 3, 0 };
+        int[] triangles = { 7, 6, 2, 2, 4, 7, 5, 1, 6, 6, 7, 5, 1, 0, 2, 2, 6, 1, 3, 5, 7, 7, 4, 3, 3, 0, 1, 1, 5, 3, 4, 2, 0, 0, 3, 4, };
+        cubeMesh.vertices = vertices;
+        cubeMesh.triangles = triangles;
+        cubeMesh.RecalculateNormals();
+        cube.GetComponent<MeshFilter>().mesh = cubeMesh;
+    }
+    void Test2DMeshGeneration()
     {
         int blockID = 1;    //Hardcoded ID of the block (Stone)
         int[] faceTris;
@@ -49,15 +74,16 @@ public class BlockRenderer : MonoBehaviour
     }
     void GenerateChunkMesh()
     {
-        foreach (Chunk chunkToRender in ChunkManagerInstance.ChunksToGenerate)
+        foreach (Chunk chunkToRender in chunkManagerInstance.ChunksToGenerate)
         {
             //Temporary code for visible block generation
             //Create a chunk object
             GameObject g = new GameObject();
-            g.transform.name = "Chunk " + ChunkManagerInstance.GetChunkID(chunkToRender);
-            g.transform.parent = ChunkManagerInstance.transform;
+            g.transform.name = "Chunk " + chunkManagerInstance.GetChunkID(chunkToRender);
+            g.transform.parent = chunkManagerInstance.transform;
             g.transform.position = chunkToRender.ChunkPosition;
 
+            Mesh chunkMesh = new Mesh();
             //Iterate the virtual chunk
             for (int x = 0; x < chunkToRender.ChunkBlockIDs.GetLength(0); x++)
             {
@@ -65,8 +91,26 @@ public class BlockRenderer : MonoBehaviour
                 {
                     for (int z = 0; z < chunkToRender.ChunkBlockIDs.GetLength(2); z++)
                     {
-                        //Instantiate blocks where virtual blocks are present
-                        int[] faceTris;
+                        if (chunkToRender.ChunkBlockIDs[x, y, z] == 0)  //Current block is air, nothing to render
+                            break;
+                        //Look through bordering blocks
+                        for(int i = -1; i <= 1; i++)
+                        {
+                            for(int j = -1; j <= 1; j++)
+                            {
+                                for(int k = -1; k <= 1; k++)
+                                {
+                                    if (!IsInBounds(chunkToRender.ChunkBlockIDs, new Vector3Int(i, j, k)))  //Index is outside array bounds
+                                        break;
+                                    if ((i ^ 2 + j ^ 2 + k ^ 2) != 1)   //Bordering block is only bordering by its corner
+                                        break;
+                                    if (chunkToRender.ChunkBlockIDs[i, j, k] != 0)  //Bordering block isn't air
+                                        break;
+                                }
+                            }
+                        }
+
+/*                        int[] faceTris;
                         Vector3[] tempVertices;
                         if (chunkToRender.ChunkBlockIDs[x, y, z] != 0)
                         {
@@ -90,7 +134,7 @@ public class BlockRenderer : MonoBehaviour
                             faceMesh.triangles = faceTris;
                             faceMesh.RecalculateNormals();
                             cubeFace.GetComponent<MeshFilter>().mesh = faceMesh;
-                        }
+                        }*/
                     }
                 }
             }
