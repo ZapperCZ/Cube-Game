@@ -11,6 +11,7 @@ public class ChunkManager : MonoBehaviour
     [SerializeField] GameObject DebugBlock;
     [SerializeField] GameObject Player;                         //The active player character
     public List<Chunk> ActiveChunks = new List<Chunk>();        //List of all the currently loaded chunks
+    public List<Chunk> ChunksToGenerate = new List<Chunk>();    //List of chunks that need to have their mesh regenerated
     public bool PlayerMoved = false;
 
     Chunk lastPlayerChunk = null;
@@ -31,9 +32,11 @@ public class ChunkManager : MonoBehaviour
     private void Start()
     {
         ManuallyPopulateChunks();       //Create the chunks and populate them with virtual blocks
+        LoadNearbyChunks();
+        GetChunksToUpdate();
 
         //Temporary code for visible block generation
-        foreach (Chunk c in chunks)
+        foreach (Chunk c in ChunksToGenerate)
         {
             //Create a chunk object
             GameObject g = new GameObject();
@@ -59,7 +62,6 @@ public class ChunkManager : MonoBehaviour
                 }
             }
         }
-        LoadNearbyChunks();
     }
     void Update()
     {
@@ -68,6 +70,7 @@ public class ChunkManager : MonoBehaviour
         {
             timer = 0;
             LoadNearbyChunks();
+            GetChunksToUpdate();
         }
     }
     void ManuallyPopulateChunks()   //A debug method to manually create chunks and add blocks into them
@@ -89,6 +92,27 @@ public class ChunkManager : MonoBehaviour
                     }
                 }
                 chunks.Add(newChunk);
+            }
+        }
+    }
+    void GetChunksToUpdate()
+    {
+        bool chunkExists;
+        //TODO: Change this into a Lambda expression to improve efficiency
+        foreach (Chunk activeChunk in ActiveChunks)
+        {
+            chunkExists = false;
+            foreach(Transform existingChunk in transform)   //Iterate all existing chunks
+            {
+                if (existingChunk.name == ("Chunk " + chunks.IndexOf(activeChunk))) //The chunk has already been generated
+                {
+                    chunkExists = true;
+                    break;
+                }
+            }
+            if (!chunkExists && !ChunksToGenerate.Contains(activeChunk))    //The chunk hasn't been generated yet and isn't queued for generation
+            {
+                ChunksToGenerate.Add(activeChunk);
             }
         }
     }
