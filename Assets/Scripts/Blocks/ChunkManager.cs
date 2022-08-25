@@ -7,10 +7,10 @@ public class ChunkManager : MonoBehaviour
 
     [SerializeField] float chunkUpdateInterval = 5;             //How often should the ActiveChunk list be updated (in seconds)
     [SerializeField] int renderDistance = 6;                    //How many chunks should render near the player - number determines how many chunks away the player can see
-    [SerializeField] List<Chunk> chunks = new List<Chunk>();    //List of all chunks in the level
     [SerializeField] GameObject DebugBlock;
     [SerializeField] GameObject Player;                         //The active player character
-    public List<Chunk> ActiveChunks = new List<Chunk>();        //List of all the currently loaded chunks
+    List<Chunk> chuks = new List<Chunk>();                      //List of all chunks in the level
+    List<Chunk> ActiveChunks = new List<Chunk>();        //List of all the currently loaded chunks
     public List<Chunk> ChunksToGenerate = new List<Chunk>();    //List of chunks that need to have their mesh regenerated
     public bool PlayerMoved = false;
 
@@ -34,34 +34,6 @@ public class ChunkManager : MonoBehaviour
         ManuallyPopulateChunks();       //Create the chunks and populate them with virtual blocks
         LoadNearbyChunks();
         GetChunksToUpdate();
-
-        //Temporary code for visible block generation
-        foreach (Chunk c in ChunksToGenerate)
-        {
-            //Create a chunk object
-            GameObject g = new GameObject();
-            g.transform.name = "Chunk " + chunks.IndexOf(c);
-            g.transform.parent = transform;
-            g.transform.position = c.ChunkPosition;
-
-            //Iterate the virtual chunk
-            for (int x = 0; x < c.ChunkBlockIDs.GetLength(0); x++)
-            {
-                for (int y = 0; y < c.ChunkBlockIDs.GetLength(1); y++)
-                {
-                    for (int z = 0; z < c.ChunkBlockIDs.GetLength(2); z++)
-                    {
-                        //Instantiate blocks where virtual blocks are present
-                        if (c.ChunkBlockIDs[x, y, z] == 1)
-                        {
-                            GameObject newCube = GameObject.Instantiate(DebugBlock);
-                            newCube.transform.parent = g.transform;
-                            newCube.transform.position = GetBlockPosition(chunks.IndexOf(c), new Vector3(x, y, z));
-                        }
-                    }
-                }
-            }
-        }
     }
     void Update()
     {
@@ -91,7 +63,7 @@ public class ChunkManager : MonoBehaviour
                         newChunk.ChunkBlockIDs[x, (newChunk.ChunkBlockIDs.GetLength(1)) / 2, z] = 1;
                     }
                 }
-                chunks.Add(newChunk);
+                chuks.Add(newChunk);
             }
         }
     }
@@ -104,7 +76,7 @@ public class ChunkManager : MonoBehaviour
             chunkExists = false;
             foreach(Transform existingChunk in transform)   //Iterate all existing chunks
             {
-                if (existingChunk.name == ("Chunk " + chunks.IndexOf(activeChunk))) //The chunk has already been generated
+                if (existingChunk.name == ("Chunk " + chuks.IndexOf(activeChunk))) //The chunk has already been generated
                 {
                     chunkExists = true;
                     break;
@@ -158,12 +130,16 @@ public class ChunkManager : MonoBehaviour
         }
         */
     }
+    public int GetChunkID(Chunk chunk)  //Returns ID of the input chunk in the chunk array; avoids exposing the chunk array
+    {
+        return chuks.IndexOf(chunk);
+    }
     public Chunk GetChunkAtPosition(Vector3 position)  //Returns the chunk that is closest to the input position
     {
         Chunk closestChunk = null;
         float currentDistance, lastDistance;
         lastDistance = int.MaxValue;
-        foreach (Chunk c in chunks)
+        foreach (Chunk c in chuks)
         {
             currentDistance = Vector3.Distance(position, c.ChunkPosition);      //cache the calculated distance to offload work from the cpu
             if (currentDistance < lastDistance)
@@ -178,9 +154,9 @@ public class ChunkManager : MonoBehaviour
     {
         int[] result = new int[4];
 
-        int blockChunkID = chunks.IndexOf(GetChunkAtPosition(position));    //ID of the chunk that the block is in
+        int blockChunkID = chuks.IndexOf(GetChunkAtPosition(position));    //ID of the chunk that the block is in
 
-        Vector3 localPosition = position - chunks[blockChunkID].ChunkPosition;  
+        Vector3 localPosition = position - chuks[blockChunkID].ChunkPosition;  
         int blockX = Mathf.RoundToInt(localPosition.x);
         int blockY = Mathf.RoundToInt(localPosition.y);
         int blockZ = Mathf.RoundToInt(localPosition.z);
@@ -194,8 +170,8 @@ public class ChunkManager : MonoBehaviour
     }
     public Vector3 GetBlockPosition(int chunkID, Vector3 blockCoordinates) //Returns global coordinates of a block in a chunk at the specified coordinates
     {
-        Chunk blockChunk = chunks[chunkID];
-        Vector3 blockPosition = blockCoordinates + blockChunk.ChunkPosition - new Vector3(blockChunk.ChunkBlockIDs.GetLength(0)/2, chunks[chunkID].ChunkBlockIDs.GetLength(1)/2, blockChunk.ChunkBlockIDs.GetLength(2) / 2);     //Vertical offset to make the middle of the array sit at 0 vertical
+        Chunk blockChunk = chuks[chunkID];
+        Vector3 blockPosition = blockCoordinates + blockChunk.ChunkPosition - new Vector3(blockChunk.ChunkBlockIDs.GetLength(0)/2, chuks[chunkID].ChunkBlockIDs.GetLength(1)/2, blockChunk.ChunkBlockIDs.GetLength(2) / 2);     //Vertical offset to make the middle of the array sit at 0 vertical
         return blockPosition;
     }
 }

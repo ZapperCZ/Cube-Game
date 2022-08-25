@@ -11,21 +11,21 @@ public class BlockRenderer : MonoBehaviour
     {
         ChunkManagerInstance = ChunkManager.Instance;
         LoadAvailableBlocks();
-        TestMeshGeneration();
-        //GenerateChunkMesh();
+        //TestMeshGeneration();
+        GenerateChunkMesh();
     }
     void TestMeshGeneration()
     {
-        int blockID = 1;
-        List<Vector3> tempVertices;
+        int blockID = 1;    //Hardcoded ID of the block (Stone)
         int[] faceTris;
+        Vector3[] tempVertices;
         GameObject generatedCube = new GameObject();
         generatedCube.transform.position = new Vector3(0, 5, 0);
         generatedCube.name = "Cube";
-        for (int i = 0; i < blockSides.GetLength(1); i++)
+        for (int i = 0; i < blockSides.GetLength(1); i++)   //Iterate through all the sides of a block
         {
-            tempVertices = new List<Vector3>();
-            faceTris = blockSides[blockID - 1, i].triangles.ToArray();
+            faceTris = blockSides[blockID - 1, i].triangles.ToArray();  //Get all triangles from one side of the bock
+            tempVertices = new Vector3[faceTris.Length];                //Temp array to store vertices that will be assigned to the mesh
             GameObject cubeFace = new GameObject();
             Mesh faceMesh = new Mesh();
 
@@ -35,20 +35,66 @@ public class BlockRenderer : MonoBehaviour
             cubeFace.AddComponent<MeshFilter>();
             cubeFace.AddComponent<MeshRenderer>();
             cubeFace.GetComponent<MeshRenderer>().material = ((GameObject)blocks[blockID - 1]).GetComponent<MeshRenderer>().sharedMaterial;
+            //Iterate through all the vertices that the triangles of this face hold IDs to
             for(int j = 0; j < faceTris.Length; j++)
             {
-                tempVertices.Add(((GameObject)blocks[blockID - 1]).GetComponent<MeshFilter>().sharedMesh.vertices[faceTris[j]]);
+                tempVertices[j] = ((GameObject)blocks[blockID - 1]).GetComponent<MeshFilter>().sharedMesh.vertices[faceTris[j]];    //Get the vertex from the ID stored in the triangle and add it to a List
                 faceTris[j] = j;
             }
-            faceMesh.vertices = tempVertices.ToArray();
+            faceMesh.vertices = tempVertices;
             faceMesh.triangles = faceTris;
-            faceMesh.RecalculateNormals();
+            faceMesh.RecalculateNormals();      //Fix lightning
             cubeFace.GetComponent<MeshFilter>().mesh = faceMesh;
         }
     }
     void GenerateChunkMesh()
     {
+        foreach (Chunk chunkToRender in ChunkManagerInstance.ChunksToGenerate)
+        {
+            //Temporary code for visible block generation
+            //Create a chunk object
+            GameObject g = new GameObject();
+            g.transform.name = "Chunk " + ChunkManagerInstance.GetChunkID(chunkToRender);
+            g.transform.parent = ChunkManagerInstance.transform;
+            g.transform.position = chunkToRender.ChunkPosition;
 
+            //Iterate the virtual chunk
+            for (int x = 0; x < chunkToRender.ChunkBlockIDs.GetLength(0); x++)
+            {
+                for (int y = 0; y < chunkToRender.ChunkBlockIDs.GetLength(1); y++)
+                {
+                    for (int z = 0; z < chunkToRender.ChunkBlockIDs.GetLength(2); z++)
+                    {
+                        //Instantiate blocks where virtual blocks are present
+                        int[] faceTris;
+                        Vector3[] tempVertices;
+                        if (chunkToRender.ChunkBlockIDs[x, y, z] != 0)
+                        {
+                            faceTris = blockSides[chunkToRender.ChunkBlockIDs[x, y, z] - 1, 4].triangles.ToArray();
+                            tempVertices = new Vector3[faceTris.Length];
+                            GameObject cubeFace = new GameObject();
+                            Mesh faceMesh = new Mesh();
+
+                            cubeFace.name = "Face";
+                            cubeFace.transform.parent = g.transform;
+                            cubeFace.transform.localPosition = new Vector3(x - (chunkToRender.ChunkBlockIDs.GetLength(0) / 2), y - (chunkToRender.ChunkBlockIDs.GetLength(1) / 2), z - (chunkToRender.ChunkBlockIDs.GetLength(2) / 2));
+                            cubeFace.AddComponent<MeshFilter>();
+                            cubeFace.AddComponent<MeshRenderer>();
+                            cubeFace.GetComponent<MeshRenderer>().material = ((GameObject)blocks[chunkToRender.ChunkBlockIDs[x, y, z] - 1]).GetComponent<MeshRenderer>().sharedMaterial;
+                            for (int j = 0; j < faceTris.Length; j++)
+                            {
+                                tempVertices[j] = ((GameObject)blocks[chunkToRender.ChunkBlockIDs[x, y, z] - 1]).GetComponent<MeshFilter>().sharedMesh.vertices[faceTris[j]];
+                                faceTris[j] = j;
+                            }
+                            faceMesh.vertices = tempVertices;
+                            faceMesh.triangles = faceTris;
+                            faceMesh.RecalculateNormals();
+                            cubeFace.GetComponent<MeshFilter>().mesh = faceMesh;
+                        }
+                    }
+                }
+            }
+        }
     }
     void LoadAvailableBlocks()  //Load all the existing block prefabs
     {
