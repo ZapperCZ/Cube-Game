@@ -165,6 +165,14 @@ public class ChunkManager : MonoBehaviour
         int blockY = Mathf.RoundToInt(localPosition.y) + (chunks[blockChunkID].ChunkBlockIDs.GetLength(1) / 2);
         int blockZ = Mathf.RoundToInt(localPosition.z) + (chunks[blockChunkID].ChunkBlockIDs.GetLength(2) / 2);
 
+        if (!IsInBounds(chunks[blockChunkID].ChunkBlockIDs,new Vector3Int(blockX, blockY, blockZ)))
+        {
+            Vector3Int inBounds = PutInBounds(chunks[blockChunkID].ChunkBlockIDs, new Vector3Int(blockX, blockY, blockZ));
+            blockX = inBounds.x;
+            blockY = inBounds.y;
+            blockZ = inBounds.z;
+        }
+
         result[0] = blockChunkID;
         result[1] = blockX;
         result[2] = blockY;
@@ -175,7 +183,41 @@ public class ChunkManager : MonoBehaviour
     public Vector3 GetBlockPosition(int chunkID, Vector3Int blockCoordinates) //Returns global coordinates of a block in a chunk at the specified coordinates
     {
         Chunk blockChunk = chunks[chunkID];
-        Vector3 blockPosition = blockCoordinates + blockChunk.ChunkPosition - new Vector3(blockChunk.ChunkBlockIDs.GetLength(0)/2, chunks[chunkID].ChunkBlockIDs.GetLength(1)/2, blockChunk.ChunkBlockIDs.GetLength(2) / 2);     //Vertical offset to make the middle of the array sit at 0 vertical
+        Vector3 blockPosition = blockCoordinates + blockChunk.ChunkPosition - new Vector3(blockChunk.ChunkBlockIDs.GetLength(0) / 2, chunks[chunkID].ChunkBlockIDs.GetLength(1) / 2, blockChunk.ChunkBlockIDs.GetLength(2) / 2);     //Vertical offset to make the middle of the array sit at 0 vertical
         return blockPosition;
+    }
+    Vector3Int PutInBounds(int[,,] boundArray, Vector3Int positionOutOfBounds)
+    {
+        Vector3Int inBounds = new Vector3Int();
+        if (positionOutOfBounds.x < 0)                              //underflow
+            inBounds.x = 0;
+        else if (positionOutOfBounds.x >= boundArray.GetLength(0))   //overflow
+            inBounds.x = boundArray.GetLength(0) - 1;
+        else                                                        //in bounds
+            inBounds.x = positionOutOfBounds.x;
+
+        if (positionOutOfBounds.y < 0)
+            inBounds.y = 0;
+        else if (positionOutOfBounds.y >= boundArray.GetLength(1))
+            inBounds.y = boundArray.GetLength(1) - 1;
+        else
+            inBounds.y = positionOutOfBounds.y;
+
+        if (positionOutOfBounds.z < 0)
+            inBounds.z = 0;
+        else if (positionOutOfBounds.z >= boundArray.GetLength(2))
+            inBounds.z = boundArray.GetLength(2) - 1;
+        else
+            inBounds.z = positionOutOfBounds.z;
+
+        return inBounds;
+    }
+    bool IsInBounds(int[,,] arrayToCheck, Vector3Int positionToCheck)
+    {
+        bool result = false;
+        result = (positionToCheck.x >= 0 && positionToCheck.x < arrayToCheck.GetLength(0)) &&
+                (positionToCheck.y >= 0 && positionToCheck.y < arrayToCheck.GetLength(1)) &&
+                (positionToCheck.z >= 0 && positionToCheck.z < arrayToCheck.GetLength(2));
+        return result;
     }
 }
