@@ -9,8 +9,8 @@ public class ChunkManager : MonoBehaviour
     [SerializeField] int renderDistance = 6;                    //How many chunks should render near the player - number determines how many chunks away the player can see
     [SerializeField] GameObject DebugBlock;
     [SerializeField] GameObject Player;                         //The active player character
-    List<Chunk> chuks = new List<Chunk>();                      //List of all chunks in the level
-    List<Chunk> ActiveChunks = new List<Chunk>();        //List of all the currently loaded chunks
+    List<Chunk> chunks = new List<Chunk>();                      //List of all chunks in the level
+    public List<Chunk> ActiveChunks = new List<Chunk>();        //List of all the currently loaded chunks
     public List<Chunk> ChunksToGenerate = new List<Chunk>();    //List of chunks that need to have their mesh regenerated
     public bool PlayerMoved = false;
 
@@ -48,9 +48,9 @@ public class ChunkManager : MonoBehaviour
     void ManuallyPopulateChunks()   //A debug method to manually create chunks and add blocks into them
     {
         //Create a 3x3 chunk grid with the center one being at [0;0;0]
-        for (int i = -1; i <= 1; i++)
+        for (int i = 0; i <= 0; i++)
         {
-            for (int j = -1; j <= 1; j++)
+            for (int j = 0; j <= 0; j++)
             {
                 Chunk newChunk = new Chunk();
                 newChunk.ChunkPosition = new Vector3(i * newChunk.ChunkBlockIDs.GetLength(0), 0, j * newChunk.ChunkBlockIDs.GetLength(2));
@@ -58,12 +58,15 @@ public class ChunkManager : MonoBehaviour
                 //Create a stone layer in the middle of the chunk
                 for (int x = 0; x < newChunk.ChunkBlockIDs.GetLength(0); x++)
                 {
-                    for (int z = 0; z < newChunk.ChunkBlockIDs.GetLength(2); z++)
+                    for (int y = newChunk.ChunkBlockIDs.GetLength(1) / 2; y >= (newChunk.ChunkBlockIDs.GetLength(1) / 2); y--)
                     {
-                        newChunk.ChunkBlockIDs[x, (newChunk.ChunkBlockIDs.GetLength(1)) / 2, z] = 1;
+                        for (int z = 0; z < newChunk.ChunkBlockIDs.GetLength(2); z++)
+                        {
+                            newChunk.ChunkBlockIDs[x, y, z] = 1;
+                        }
                     }
                 }
-                chuks.Add(newChunk);
+                chunks.Add(newChunk);
             }
         }
     }
@@ -76,7 +79,7 @@ public class ChunkManager : MonoBehaviour
             chunkExists = false;
             foreach(Transform existingChunk in transform)   //Iterate all existing chunks
             {
-                if (existingChunk.name == ("Chunk " + chuks.IndexOf(activeChunk))) //The chunk has already been generated
+                if (existingChunk.name == ("Chunk " + chunks.IndexOf(activeChunk))) //The chunk has already been generated
                 {
                     chunkExists = true;
                     break;
@@ -132,14 +135,14 @@ public class ChunkManager : MonoBehaviour
     }
     public int GetChunkID(Chunk chunk)  //Returns ID of the input chunk in the chunk array; avoids exposing the chunk array
     {
-        return chuks.IndexOf(chunk);
+        return chunks.IndexOf(chunk);
     }
     public Chunk GetChunkAtPosition(Vector3 position)  //Returns the chunk that is closest to the input position
     {
         Chunk closestChunk = null;
         float currentDistance, lastDistance;
         lastDistance = int.MaxValue;
-        foreach (Chunk c in chuks)
+        foreach (Chunk c in chunks)
         {
             currentDistance = Vector3.Distance(position, c.ChunkPosition);      //cache the calculated distance to offload work from the cpu
             if (currentDistance < lastDistance)
@@ -154,12 +157,13 @@ public class ChunkManager : MonoBehaviour
     {
         int[] result = new int[4];
 
-        int blockChunkID = chuks.IndexOf(GetChunkAtPosition(position));    //ID of the chunk that the block is in
+        int blockChunkID = chunks.IndexOf(GetChunkAtPosition(position));    //ID of the chunk that the block is in
 
-        Vector3 localPosition = position - chuks[blockChunkID].ChunkPosition;  
-        int blockX = Mathf.RoundToInt(localPosition.x);
-        int blockY = Mathf.RoundToInt(localPosition.y);
-        int blockZ = Mathf.RoundToInt(localPosition.z);
+        Vector3 localPosition = position - chunks[blockChunkID].ChunkPosition;
+
+        int blockX = Mathf.RoundToInt(localPosition.x) + (chunks[blockChunkID].ChunkBlockIDs.GetLength(0) / 2);
+        int blockY = Mathf.RoundToInt(localPosition.y) + (chunks[blockChunkID].ChunkBlockIDs.GetLength(1) / 2);
+        int blockZ = Mathf.RoundToInt(localPosition.z) + (chunks[blockChunkID].ChunkBlockIDs.GetLength(2) / 2);
 
         result[0] = blockChunkID;
         result[1] = blockX;
@@ -168,10 +172,10 @@ public class ChunkManager : MonoBehaviour
 
         return result;
     }
-    public Vector3 GetBlockPosition(int chunkID, Vector3 blockCoordinates) //Returns global coordinates of a block in a chunk at the specified coordinates
+    public Vector3 GetBlockPosition(int chunkID, Vector3Int blockCoordinates) //Returns global coordinates of a block in a chunk at the specified coordinates
     {
-        Chunk blockChunk = chuks[chunkID];
-        Vector3 blockPosition = blockCoordinates + blockChunk.ChunkPosition - new Vector3(blockChunk.ChunkBlockIDs.GetLength(0)/2, chuks[chunkID].ChunkBlockIDs.GetLength(1)/2, blockChunk.ChunkBlockIDs.GetLength(2) / 2);     //Vertical offset to make the middle of the array sit at 0 vertical
+        Chunk blockChunk = chunks[chunkID];
+        Vector3 blockPosition = blockCoordinates + blockChunk.ChunkPosition - new Vector3(blockChunk.ChunkBlockIDs.GetLength(0)/2, chunks[chunkID].ChunkBlockIDs.GetLength(1)/2, blockChunk.ChunkBlockIDs.GetLength(2) / 2);     //Vertical offset to make the middle of the array sit at 0 vertical
         return blockPosition;
     }
 }

@@ -7,12 +7,17 @@ public class BlockRenderer : MonoBehaviour
     Object[] blocks;
     BlockSide[,] blockSides;    //An array containing the side information of all blocks
     Vector3[] triangleNormals;
+    List<Chunk> chunksToRemoveFromQueue;
     void Start()
     {
         chunkManagerInstance = ChunkManager.Instance;
         LoadAvailableBlocks();
         //Test2DMeshGeneration();
         //Test3DMeshGeneration();
+        GenerateChunkMesh();
+    }
+    void Update()
+    {
         GenerateChunkMesh();
     }
     void Test3DMeshGeneration()     //Generates a cube made out of a single mesh (Has broken lighting)
@@ -73,8 +78,18 @@ public class BlockRenderer : MonoBehaviour
     }
     void GenerateChunkMesh()
     {
+        chunksToRemoveFromQueue = new List<Chunk>();
         foreach (Chunk chunkToRender in chunkManagerInstance.ChunksToGenerate)
         {
+            foreach (Transform existingChunk in chunkManagerInstance.transform)   //Iterate all existing chunks
+            {
+                if (existingChunk.name == ("Chunk " + chunkManagerInstance.GetChunkID(chunkToRender))) //The chunk has already been generated
+                {
+                    Destroy(existingChunk.gameObject);
+                    break;
+                }
+            }
+
             //Temporary code for visible block generation
             //Create a chunk object
             GameObject g = new GameObject();
@@ -97,7 +112,11 @@ public class BlockRenderer : MonoBehaviour
                         if (chunkToRender.ChunkBlockIDs[x, y, z] == 0)  //Current block is air, nothing to render
                             break;
                         blockID = chunkToRender.ChunkBlockIDs[x, y, z] - 1; //-1 because actual block IDs start at 1, 0 is air
-                        //Look through bordering blocks
+                        GameObject newCube = GameObject.Instantiate((GameObject)blocks[blockID]);
+                        newCube.transform.parent = g.transform;
+                        newCube.transform.position = chunkManagerInstance.GetBlockPosition(chunkManagerInstance.GetChunkID(chunkToRender), new Vector3Int(x, y, z));
+
+/*                        //Look through bordering blocks
                         for (int i = -1; i <= 1; i++)
                         {
                             for(int j = -1; j <= 1; j++)
@@ -122,7 +141,7 @@ public class BlockRenderer : MonoBehaviour
                                     Debug.Log(i + " ," + j + " ," + k + " - " + faceID);
                                 }
                             }
-                        }
+                        }*/
 /*                        int[] faceTris;
                         Vector3[] tempVertices;
                         if (chunkToRender.ChunkBlockIDs[x, y, z] != 0)
@@ -151,6 +170,11 @@ public class BlockRenderer : MonoBehaviour
                     }
                 }
             }
+            chunksToRemoveFromQueue.Add(chunkToRender);
+        }
+        foreach(Chunk chunkToRemove in chunksToRemoveFromQueue)
+        {
+            chunkManagerInstance.ChunksToGenerate.Remove(chunkToRemove);
         }
     }
     void LoadAvailableBlocks()  //Load all the existing block prefabs
