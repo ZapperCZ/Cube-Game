@@ -13,10 +13,11 @@ public class BlockEditor : MonoBehaviour
     ChunkManager chunkManagerInstance;
     BlockRenderer playerBlockRenderer;
     RaycastHit hit;
-    Vector3 targetBlockPosition = Vector3.zero;     //Position of the block to be placed / destroyed in global coordinates
     Chunk affectedChunk;                            //Chunk that the block is being placed / destroyed inside of
     int[] targetBlockInfo;
+    int targetBlockID = 0;
     int viewedBlockID = 0;
+    Material originalBlockMaterial;
     GameObject lastViewedBlock = null;
     int selectedBlockID = 1;                        //ID of the block to place, currently hardcoded
     float offset = 0.2f;                            //Offset from the face normal when getting a block
@@ -35,28 +36,29 @@ public class BlockEditor : MonoBehaviour
         ViewedBlockInfo = chunkManagerInstance.GetBlockAtPosition(hit.point + (hit.normal * offset * -1));
         viewedBlockID = chunkManagerInstance.ActiveChunks[ViewedBlockInfo[0]].ChunkBlockIDs[ViewedBlockInfo[1], ViewedBlockInfo[2], ViewedBlockInfo[3]];
         
-        if (Input.GetButton("Left Click"))
+        if (Input.GetButton("Left Click") && viewedBlockID!=0)
         {
             if (targetBlockInfo[0] != ViewedBlockInfo[0] ||
                 targetBlockInfo[1] != ViewedBlockInfo[1] ||
                 targetBlockInfo[2] != ViewedBlockInfo[2] ||
                 targetBlockInfo[3] != ViewedBlockInfo[3])      //The block being broken changed
             {
-                Debug.Log(ViewedBlockInfo[0] + " ," + ViewedBlockInfo[1] + " ," + ViewedBlockInfo[2] + " ," + ViewedBlockInfo[3]);
-/*                if (lastViewedBlockID != 0 && lastViewedBlock != null)
+/*                Debug.Log("Changed");
+                if (targetBlockID != 0 && lastViewedBlock != null)
                 {
-                    lastViewedBlock.GetComponent<MeshRenderer>().material = playerBlockRenderer.GetBlock(lastViewedBlockID-1).GetComponent<MeshRenderer>().sharedMaterial;
+                    lastViewedBlock.GetComponent<MeshRenderer>().material = originalBlockMaterial;
                 }
-                lastViewedBlockID = chunkManagerInstance.ActiveChunks[ViewedBlockInfo[0]].ChunkBlockIDs[ViewedBlockInfo[1], ViewedBlockInfo[2], ViewedBlockInfo[3]];
                 lastViewedBlock = hit.transform.gameObject;
+                originalBlockMaterial = lastViewedBlock.GetComponent<MeshRenderer>().material;
                 lastViewedBlock.GetComponent<MeshRenderer>().material.color = Color.red;*/
                 
                 targetBlockInfo = ViewedBlockInfo;
+                targetBlockID = viewedBlockID;
                 affectedChunk = chunkManagerInstance.ActiveChunks[targetBlockInfo[0]];
                 timer = 0;
             }
             timer += Time.deltaTime;
-            Debug.Log(timer +" - "+ playerBlockRenderer.GetBlock(viewedBlockID - 1).GetComponent<BlockProperties>().TimeToBreak / 1000);
+            //Debug.Log(timer +" - "+ playerBlockRenderer.GetBlock(viewedBlockID - 1).GetComponent<BlockProperties>().TimeToBreak / 1000);
             if (timer > playerBlockRenderer.GetBlock(viewedBlockID-1).GetComponent<BlockProperties>().TimeToBreak/1000)
             {
                 BreakBlock();
