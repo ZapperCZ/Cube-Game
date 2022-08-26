@@ -27,31 +27,27 @@ public class BlockEditor : MonoBehaviour
     {
         if (!Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, playerReach, blockLayer)) //No blocks within reach
             return;
-
         ViewedBlockInfo = chunkManagerInstance.GetBlockAtPosition(hit.point);
         affectedChunk = chunkManagerInstance.ActiveChunks[ViewedBlockInfo[0]];
         if (Input.GetButtonDown("Left Click"))
         {
 
-            Debug.Log("Left");
         }
         if (Input.GetButtonDown("Right Click"))
         {
-            //targetBlockPosition = chunkManagerInstance.GetBlockPosition(ViewedBlockInfo[0], );
+            hit.transform.GetComponent<MeshRenderer>().material.color = Color.cyan;
             targetBlockInfo = chunkManagerInstance.GetBlockAtPosition(hit.point + (hit.normal * offset));
             PlaceBlock();
-            //Debug.Log("Right");
         }
     }
     void PlaceBlock()
     {
-        Debug.Log(targetBlockInfo[1] + " ," + targetBlockInfo[2] + " ," + targetBlockInfo[3]);
-        Debug.Log(chunkManagerInstance.GetBlockPosition(targetBlockInfo[0], new Vector3Int(targetBlockInfo[1], targetBlockInfo[2], targetBlockInfo[3])));
         chunkManagerInstance.ActiveChunks[targetBlockInfo[0]].ChunkBlockIDs[targetBlockInfo[1], targetBlockInfo[2], targetBlockInfo[3]] = selectedBlockID;
         chunkManagerInstance.ChunksToGenerate.Add(affectedChunk);
     }
     void BreakBlock()
     {
-
+        chunkManagerInstance.ActiveChunks[targetBlockInfo[0]].ChunkBlockIDs[targetBlockInfo[1], targetBlockInfo[2], targetBlockInfo[3]] = 0;
+        chunkManagerInstance.ChunksToGenerate.Add(affectedChunk);
     }
 }

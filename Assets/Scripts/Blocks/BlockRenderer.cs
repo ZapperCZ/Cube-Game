@@ -72,7 +72,7 @@ public class BlockRenderer : MonoBehaviour
             }
             faceMesh.vertices = tempVertices;
             faceMesh.triangles = faceTris;
-            faceMesh.RecalculateNormals();      //Fix lightning
+            faceMesh.RecalculateNormals();      //Fix lighting
             cubeFace.GetComponent<MeshFilter>().mesh = faceMesh;
         }
     }
@@ -110,7 +110,7 @@ public class BlockRenderer : MonoBehaviour
                     for (int z = 0; z < chunkToRender.ChunkBlockIDs.GetLength(2); z++)
                     {
                         if (chunkToRender.ChunkBlockIDs[x, y, z] == 0)  //Current block is air, nothing to render
-                            break;
+                            continue;
                         blockID = chunkToRender.ChunkBlockIDs[x, y, z] - 1; //-1 because actual block IDs start at 1, 0 is air
                         GameObject newCube = GameObject.Instantiate((GameObject)blocks[blockID]);
                         newCube.transform.parent = g.transform;
