@@ -237,4 +237,8 @@ public class BlockRenderer : MonoBehaviour
                 (positionToCheck.z >= 0 && positionToCheck.z < arrayToCheck.GetLength(2));
         return result;
     }
+    public GameObject GetBlock(int blockID)
+    {
+        return (GameObject)blocks[blockID];
+    }
 }
