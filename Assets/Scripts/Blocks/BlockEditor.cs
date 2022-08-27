@@ -17,7 +17,7 @@ public class BlockEditor : MonoBehaviour
     int[] targetBlockInfo;
     int targetBlockID = 0;
     int viewedBlockID = 0;
-    Material originalBlockMaterial;
+    Color originalBlockColor;
     GameObject lastViewedBlock = null;
     int selectedBlockID = 1;                        //ID of the block to place, currently hardcoded
     float offset = 0.2f;                            //Offset from the face normal when getting a block
@@ -43,38 +43,45 @@ public class BlockEditor : MonoBehaviour
                 targetBlockInfo[2] != ViewedBlockInfo[2] ||
                 targetBlockInfo[3] != ViewedBlockInfo[3])      //The block being broken changed
             {
-/*                Debug.Log("Changed");
+                //Color highlight
                 if (targetBlockID != 0 && lastViewedBlock != null)
                 {
-                    lastViewedBlock.GetComponent<MeshRenderer>().material = originalBlockMaterial;
+                    lastViewedBlock.GetComponent<MeshRenderer>().material.color = originalBlockColor;
                 }
                 lastViewedBlock = hit.transform.gameObject;
-                originalBlockMaterial = lastViewedBlock.GetComponent<MeshRenderer>().material;
-                lastViewedBlock.GetComponent<MeshRenderer>().material.color = Color.red;*/
-                
+                //Copy the color values manually to avoid creating a reference to the original which gets altered later
+                originalBlockColor.a = lastViewedBlock.GetComponent<MeshRenderer>().material.color.a;
+                originalBlockColor.r = lastViewedBlock.GetComponent<MeshRenderer>().material.color.r;
+                originalBlockColor.g = lastViewedBlock.GetComponent<MeshRenderer>().material.color.g;
+                originalBlockColor.b = lastViewedBlock.GetComponent<MeshRenderer>().material.color.b;
+                lastViewedBlock.GetComponent<MeshRenderer>().material.color = Color.red;
+
                 targetBlockInfo = ViewedBlockInfo;
                 targetBlockID = viewedBlockID;
                 affectedChunk = chunkManagerInstance.ActiveChunks[targetBlockInfo[0]];
                 timer = 0;
             }
             timer += Time.deltaTime;
-            //Debug.Log(timer +" - "+ playerBlockRenderer.GetBlock(viewedBlockID - 1).GetComponent<BlockProperties>().TimeToBreak / 1000);
             if (timer > playerBlockRenderer.GetBlock(viewedBlockID-1).GetComponent<BlockProperties>().TimeToBreak/1000)
             {
                 BreakBlock();
                 timer = 0;
             }
         }
-/*        if(Input.GetButtonUp("Left Click") && lastViewedBlock != null && lastViewedBlockID != 0)
+        if (Input.GetButtonUp("Left Click") && targetBlockID != 0 && lastViewedBlock != null)
         {
-            lastViewedBlock.GetComponent<MeshRenderer>().material = playerBlockRenderer.GetBlock(lastViewedBlockID - 1).GetComponent<MeshRenderer>().sharedMaterial;
-        }*/
+            lastViewedBlock.GetComponent<MeshRenderer>().material.color = originalBlockColor;
+            targetBlockInfo = new int[4];
+        }
         if (Input.GetButtonDown("Right Click"))
         {
+            //Color highlight
             hit.transform.GetComponent<MeshRenderer>().material.color = Color.cyan;
+
             targetBlockInfo = chunkManagerInstance.GetBlockAtPosition(hit.point + (hit.normal * offset));
             affectedChunk = chunkManagerInstance.ActiveChunks[targetBlockInfo[0]];
             PlaceBlock();
+            targetBlockInfo = new int[4];
         }
     }
     void PlaceBlock()
