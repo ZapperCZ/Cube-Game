@@ -9,10 +9,13 @@ public class BlockRenderer : MonoBehaviour
     BlockSide[,] blockSides;    //An array containing the side information of all blocks
     Vector3[] triangleNormals;
     List<Chunk> chunksToRemoveFromQueue;
+    void Awake()
+    {
+        LoadAvailableBlocks();
+    }
     void Start()
     {
         chunkManagerInstance = ChunkManager.Instance;
-        LoadAvailableBlocks();
         //Test2DMeshGeneration();
         //Test3DMeshGeneration();
         GenerateChunkMesh();
@@ -189,7 +192,6 @@ public class BlockRenderer : MonoBehaviour
 
         foreach (GameObject block in Blocks)
         {
-            Debug.Log(((GameObject)block).name);
             blockMesh = block.GetComponent<MeshFilter>().sharedMesh;
             triangleNormals = new Vector3[blockMesh.triangles.Length/3];
 
