@@ -135,8 +135,9 @@ public class ChunkManager : MonoBehaviour
     public Chunk GetChunkAtPosition(Vector3 position)  //Returns the chunk that is closest to the input position
     {
         Chunk closestChunk = null;
+        position += new Vector3(0.5f, 0, 0.5f);     //Introduce 0.5 offset because a block has it's center at 0,0 and it's border at 0.5,0.5
         float currentDistance, lastDistance;
-        lastDistance = int.MaxValue;
+        lastDistance = float.MaxValue;
         foreach (Chunk c in chunks)
         {
             currentDistance = Vector3.Distance(position, c.ChunkPosition);      //cache the calculated distance to offload work from the cpu
