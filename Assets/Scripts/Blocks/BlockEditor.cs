@@ -57,14 +57,17 @@ public class BlockEditor : MonoBehaviour
 
                 targetBlockInfo = ViewedBlockInfo;
                 targetBlockID = viewedBlockID;
-                timeTobreak = playerBlockRenderer.GetBlock(targetBlockID - 1).GetComponent<BlockProperties>().TimeToBreak / 1000;
+                timeTobreak = ((GameObject)playerBlockRenderer.blocks[targetBlockID - 1]).GetComponent<BlockProperties>().TimeToBreak / 1000;
                 affectedChunk = chunkManagerInstance.ActiveChunks[targetBlockInfo[0]];
                 timer = 0;
             }
-            r = originalBlockColor.r + (Color.red.r - originalBlockColor.r) * (timer / timeTobreak);
-            g = originalBlockColor.g + (Color.red.g - originalBlockColor.g) * (timer / timeTobreak);
-            b = originalBlockColor.b + (Color.red.b - originalBlockColor.b) * (timer / timeTobreak);
-            lastViewedBlock.GetComponent<MeshRenderer>().material.color = new Color(r, g, b);
+            if (lastViewedBlock != null)
+            {
+                r = originalBlockColor.r + (Color.red.r - originalBlockColor.r) * (timer / timeTobreak);
+                g = originalBlockColor.g + (Color.red.g - originalBlockColor.g) * (timer / timeTobreak);
+                b = originalBlockColor.b + (Color.red.b - originalBlockColor.b) * (timer / timeTobreak);
+                lastViewedBlock.GetComponent<MeshRenderer>().material.color = new Color(r, g, b);
+            }
             timer += Time.deltaTime;
             if (timer > timeTobreak)
             {
