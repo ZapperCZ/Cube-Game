@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class BlockRenderer : MonoBehaviour
@@ -180,6 +181,7 @@ public class BlockRenderer : MonoBehaviour
     void LoadAvailableBlocks()  //Load all the existing block prefabs
     {
         blocks = Resources.LoadAll("Blocks",typeof(GameObject));
+        System.Array.Sort(blocks, (x, y) => ((GameObject)x).GetComponent<BlockProperties>().ID - ((GameObject)y).GetComponent<BlockProperties>().ID);
         blockSides = new BlockSide[blocks.Length, 6]; //Each block has 6 possible directions its normals can face
 
         Mesh blockMesh;
@@ -187,6 +189,7 @@ public class BlockRenderer : MonoBehaviour
 
         foreach (GameObject block in blocks)
         {
+            Debug.Log(((GameObject)block).name);
             blockMesh = block.GetComponent<MeshFilter>().sharedMesh;
             triangleNormals = new Vector3[blockMesh.triangles.Length/3];
 

@@ -126,12 +126,6 @@ public class ChunkManager : MonoBehaviour
                 ActiveChunks.RemoveAt(i);
             }
         }
-        /*
-        foreach(Chunk c in ActiveChunks)
-        {
-            Debug.Log(chunks.IndexOf(c));
-        }
-        */
     }
     public int GetChunkID(Chunk chunk)  //Returns ID of the input chunk in the chunk array; avoids exposing the chunk array
     {
