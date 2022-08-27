@@ -82,9 +82,6 @@ public class BlockEditor : MonoBehaviour
         }
         if (Input.GetButtonDown("Right Click"))
         {
-            //Color highlight
-            hit.transform.GetComponent<MeshRenderer>().material.color = Color.cyan;
-
             targetBlockInfo = chunkManagerInstance.GetBlockAtPosition(hit.point + (hit.normal * offset));
             affectedChunk = chunkManagerInstance.ActiveChunks[targetBlockInfo[0]];
             PlaceBlock();
