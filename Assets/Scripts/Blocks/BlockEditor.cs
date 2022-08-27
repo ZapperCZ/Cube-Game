@@ -57,7 +57,7 @@ public class BlockEditor : MonoBehaviour
 
                 targetBlockInfo = ViewedBlockInfo;
                 targetBlockID = viewedBlockID;
-                timeTobreak = ((GameObject)playerBlockRenderer.blocks[targetBlockID - 1]).GetComponent<BlockProperties>().TimeToBreak / 1000;
+                timeTobreak = ((GameObject)playerBlockRenderer.Blocks[targetBlockID - 1]).GetComponent<BlockProperties>().TimeToBreak / 1000;
                 affectedChunk = chunkManagerInstance.ActiveChunks[targetBlockInfo[0]];
                 timer = 0;
             }

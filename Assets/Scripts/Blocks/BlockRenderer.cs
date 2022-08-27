@@ -5,7 +5,7 @@ using UnityEngine;
 public class BlockRenderer : MonoBehaviour
 {
     ChunkManager chunkManagerInstance;
-    Object[] blocks;
+    public Object[] Blocks { get; private set; }
     BlockSide[,] blockSides;    //An array containing the side information of all blocks
     Vector3[] triangleNormals;
     List<Chunk> chunksToRemoveFromQueue;
@@ -27,7 +27,7 @@ public class BlockRenderer : MonoBehaviour
         GameObject cube = new GameObject();
         cube.AddComponent<MeshRenderer>();
         cube.AddComponent<MeshFilter>();
-        cube.GetComponent<MeshRenderer>().material = ((GameObject)blocks[blockID - 1]).GetComponent<MeshRenderer>().sharedMaterial;
+        cube.GetComponent<MeshRenderer>().material = ((GameObject)Blocks[blockID - 1]).GetComponent<MeshRenderer>().sharedMaterial;
         Mesh cubeMesh = new Mesh();
         Vector3 point1 = new Vector3(-0.5f, -0.5f, -0.5f);
         Vector3 point2 = new Vector3(0.5f, -0.5f, -0.5f);
@@ -64,11 +64,11 @@ public class BlockRenderer : MonoBehaviour
             cubeFace.transform.localPosition = Vector3.zero;
             cubeFace.AddComponent<MeshFilter>();
             cubeFace.AddComponent<MeshRenderer>();
-            cubeFace.GetComponent<MeshRenderer>().material = ((GameObject)blocks[blockID - 1]).GetComponent<MeshRenderer>().sharedMaterial;
+            cubeFace.GetComponent<MeshRenderer>().material = ((GameObject)Blocks[blockID - 1]).GetComponent<MeshRenderer>().sharedMaterial;
             //Iterate through all the vertices that the triangles of this face hold IDs to
             for(int j = 0; j < faceTris.Length; j++)
             {
-                tempVertices[j] = ((GameObject)blocks[blockID - 1]).GetComponent<MeshFilter>().sharedMesh.vertices[faceTris[j]];    //Get the vertex from the ID stored in the triangle and add it to a List
+                tempVertices[j] = ((GameObject)Blocks[blockID - 1]).GetComponent<MeshFilter>().sharedMesh.vertices[faceTris[j]];    //Get the vertex from the ID stored in the triangle and add it to a List
                 faceTris[j] = j;
             }
             faceMesh.vertices = tempVertices;
@@ -113,7 +113,7 @@ public class BlockRenderer : MonoBehaviour
                         if (chunkToRender.ChunkBlockIDs[x, y, z] == 0)  //Current block is air, nothing to render
                             continue;
                         blockID = chunkToRender.ChunkBlockIDs[x, y, z] - 1; //-1 because actual block IDs start at 1, 0 is air
-                        GameObject newCube = GameObject.Instantiate((GameObject)blocks[blockID]);
+                        GameObject newCube = GameObject.Instantiate((GameObject)Blocks[blockID]);
                         newCube.transform.parent = g.transform;
                         newCube.transform.position = chunkManagerInstance.GetBlockPosition(chunkManagerInstance.GetChunkID(chunkToRender), new Vector3Int(x, y, z));
 
@@ -180,14 +180,14 @@ public class BlockRenderer : MonoBehaviour
     }
     void LoadAvailableBlocks()  //Load all the existing block prefabs
     {
-        blocks = Resources.LoadAll("Blocks",typeof(GameObject));
-        System.Array.Sort(blocks, (x, y) => ((GameObject)x).GetComponent<BlockProperties>().ID - ((GameObject)y).GetComponent<BlockProperties>().ID);
-        blockSides = new BlockSide[blocks.Length, 6]; //Each block has 6 possible directions its normals can face
+        Blocks = Resources.LoadAll("Blocks",typeof(GameObject));
+        System.Array.Sort(Blocks, (x, y) => ((GameObject)x).GetComponent<BlockProperties>().ID - ((GameObject)y).GetComponent<BlockProperties>().ID);
+        blockSides = new BlockSide[Blocks.Length, 6]; //Each block has 6 possible directions its normals can face
 
         Mesh blockMesh;
         Vector3 point1, point2, point3;
 
-        foreach (GameObject block in blocks)
+        foreach (GameObject block in Blocks)
         {
             Debug.Log(((GameObject)block).name);
             blockMesh = block.GetComponent<MeshFilter>().sharedMesh;
@@ -217,15 +217,15 @@ public class BlockRenderer : MonoBehaviour
                     Vector3 currentSide = new Vector3(tempIndex[0], tempIndex[1], tempIndex[2]);
                     y = ((int)(i / 2f + 0.5f) * 3) + j;
 
-                    blockSides[System.Array.IndexOf(blocks, block), y] = new BlockSide();
+                    blockSides[System.Array.IndexOf(Blocks, block), y] = new BlockSide();
 
                     for (int k = 0; k < triangleNormals.Length; k++)
                     {
                         if (triangleNormals[k] == currentSide)
                         {
-                            blockSides[System.Array.IndexOf(blocks, block), y].triangles.Add(blockMesh.triangles[k * 3]);
-                            blockSides[System.Array.IndexOf(blocks, block), y].triangles.Add(blockMesh.triangles[k * 3 + 1]);
-                            blockSides[System.Array.IndexOf(blocks, block), y].triangles.Add(blockMesh.triangles[k * 3 + 2]);
+                            blockSides[System.Array.IndexOf(Blocks, block), y].triangles.Add(blockMesh.triangles[k * 3]);
+                            blockSides[System.Array.IndexOf(Blocks, block), y].triangles.Add(blockMesh.triangles[k * 3 + 1]);
+                            blockSides[System.Array.IndexOf(Blocks, block), y].triangles.Add(blockMesh.triangles[k * 3 + 2]);
                         }
                     }
                 }
@@ -239,9 +239,5 @@ public class BlockRenderer : MonoBehaviour
                 (positionToCheck.y >= 0 && positionToCheck.y < arrayToCheck.GetLength(1)) &&
                 (positionToCheck.z >= 0 && positionToCheck.z < arrayToCheck.GetLength(2));
         return result;
-    }
-    public GameObject GetBlock(int blockID)
-    {
-        return (GameObject)blocks[blockID];
     }
 }
