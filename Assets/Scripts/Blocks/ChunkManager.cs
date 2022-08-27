@@ -48,9 +48,9 @@ public class ChunkManager : MonoBehaviour
     void ManuallyPopulateChunks()   //A debug method to manually create chunks and add blocks into them
     {
         //Create a 3x3 chunk grid with the center one being at [0;0;0]
-        for (int i = 0; i <= 0; i++)
+        for (int i = -1; i <= 1; i++)
         {
-            for (int j = 0; j <= 0; j++)
+            for (int j = -1; j <= 1; j++)
             {
                 Chunk newChunk = new Chunk();
                 newChunk.ChunkPosition = new Vector3(i * newChunk.ChunkBlockIDs.GetLength(0), 0, j * newChunk.ChunkBlockIDs.GetLength(2));
