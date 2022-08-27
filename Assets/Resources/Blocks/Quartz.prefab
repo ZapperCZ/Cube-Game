@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7406911545440878779}
   - component: {fileID: -4757237722658661359}
   m_Layer: 0
-  m_Name: Grass
+  m_Name: Quartz
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -63,7 +63,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: fe474bebfb3e4f9479daf60cbccd2245, type: 2}
+  - {fileID: 2100000, guid: 7192d2234158bc5418e293ffd0291aad, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -97,9 +97,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c84ddbfce2bd7e64685832b392dccc02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ID: 3
-  Name: Grass
-  TimeToBreak: 700
+  ID: 6
+  Name: Quartz
+  TimeToBreak: 2000
 --- !u!65 &-4757237722658661359
 BoxCollider:
   m_ObjectHideFlags: 0

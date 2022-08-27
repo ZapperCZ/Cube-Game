@@ -58,12 +58,13 @@ public class ChunkManager : MonoBehaviour
                 //Create a stone layer in the middle of the chunk
                 for (int x = 0; x < newChunk.ChunkBlockIDs.GetLength(0); x++)
                 {
-                    for (int y = newChunk.ChunkBlockIDs.GetLength(1) / 2; y >= (newChunk.ChunkBlockIDs.GetLength(1) / 2); y--)
+                    for (int z = 0; z < newChunk.ChunkBlockIDs.GetLength(2); z++)
                     {
-                        for (int z = 0; z < newChunk.ChunkBlockIDs.GetLength(2); z++)
-                        {
-                            newChunk.ChunkBlockIDs[x, y, z] = 1;
-                        }
+                        newChunk.ChunkBlockIDs[x, (newChunk.ChunkBlockIDs.GetLength(1) / 2), z] = 3;            //Grass
+                        newChunk.ChunkBlockIDs[x, (newChunk.ChunkBlockIDs.GetLength(1) / 2) - 1, z] = 4;        //Dirt
+                        newChunk.ChunkBlockIDs[x, (newChunk.ChunkBlockIDs.GetLength(1) / 2) - 2, z] = 2;        //Stone
+                        newChunk.ChunkBlockIDs[x, (newChunk.ChunkBlockIDs.GetLength(1) / 2) - 3, z] = 2;        //Stone
+                        newChunk.ChunkBlockIDs[x, (newChunk.ChunkBlockIDs.GetLength(1) / 2) - 4, z] = 1;        //Bedrock
                     }
                 }
                 chunks.Add(newChunk);
