@@ -5,10 +5,11 @@ using UnityEngine;
 public class BlockEditor : MonoBehaviour
 {
     [SerializeField] GameObject playerCamera;
-    [SerializeField] float playerReach = 3;     //How far the player can reach
+    [SerializeField] float playerReach = 3;             //How far the player can reach
     [SerializeField] LayerMask blockLayer;
 
-    public int[] ViewedBlockInfo;                   //Info about the block that is currently being looked at [chunkID,inChunkX,inChunkY,inChunkZ]
+    public int selectedBlockID = 1;                     //ID of the block to place, currently hardcoded
+    public int[] ViewedBlockInfo;                       //Info about the block that is currently being looked at [chunkID,inChunkX,inChunkY,inChunkZ]
                                                     
     ChunkManager chunkManagerInstance;
     BlockRenderer playerBlockRenderer;
@@ -19,9 +20,10 @@ public class BlockEditor : MonoBehaviour
     int viewedBlockID = 0;
     Color originalBlockColor;
     GameObject lastViewedBlock = null;
-    int selectedBlockID = 1;                        //ID of the block to place, currently hardcoded
     float offset = 0.2f;                            //Offset from the face normal when getting a block
     float timer = 0f;                               //Internal timer for block breaking
+    float timeTobreak = 0;
+    float r, g, b;
 
     void Start()
     {
@@ -54,15 +56,19 @@ public class BlockEditor : MonoBehaviour
                 originalBlockColor.r = lastViewedBlock.GetComponent<MeshRenderer>().material.color.r;
                 originalBlockColor.g = lastViewedBlock.GetComponent<MeshRenderer>().material.color.g;
                 originalBlockColor.b = lastViewedBlock.GetComponent<MeshRenderer>().material.color.b;
-                lastViewedBlock.GetComponent<MeshRenderer>().material.color = Color.red;
 
                 targetBlockInfo = ViewedBlockInfo;
                 targetBlockID = viewedBlockID;
+                timeTobreak = playerBlockRenderer.GetBlock(targetBlockID - 1).GetComponent<BlockProperties>().TimeToBreak / 1000;
                 affectedChunk = chunkManagerInstance.ActiveChunks[targetBlockInfo[0]];
                 timer = 0;
             }
+            r = originalBlockColor.r + (Color.red.r - originalBlockColor.r) * (timer / timeTobreak);
+            g = originalBlockColor.g + (Color.red.g - originalBlockColor.g) * (timer / timeTobreak);
+            b = originalBlockColor.b + (Color.red.b - originalBlockColor.b) * (timer / timeTobreak);
+            lastViewedBlock.GetComponent<MeshRenderer>().material.color = new Color(r, g, b);
             timer += Time.deltaTime;
-            if (timer > playerBlockRenderer.GetBlock(viewedBlockID-1).GetComponent<BlockProperties>().TimeToBreak/1000)
+            if (timer > timeTobreak)
             {
                 BreakBlock();
                 timer = 0;
