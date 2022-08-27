@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class BlockRenderer : MonoBehaviour
@@ -101,11 +100,7 @@ public class BlockRenderer : MonoBehaviour
             g.transform.parent = chunkManagerInstance.transform;
             g.transform.position = chunkToRender.ChunkPosition;
 
-            Mesh chunkMesh = new Mesh();
             int blockID;
-            int faceID;
-            int[] faceTris;
-            Vector3[] tempVertices;
             //Iterate the virtual chunk
             for (int x = 0; x < chunkToRender.ChunkBlockIDs.GetLength(0); x++)
             {
@@ -119,58 +114,6 @@ public class BlockRenderer : MonoBehaviour
                         GameObject newCube = GameObject.Instantiate((GameObject)Blocks[blockID]);
                         newCube.transform.parent = g.transform;
                         newCube.transform.position = chunkManagerInstance.GetBlockPosition(chunkManagerInstance.GetChunkID(chunkToRender), new Vector3Int(x, y, z));
-
-/*                        //Look through bordering blocks
-                        for (int i = -1; i <= 1; i++)
-                        {
-                            for(int j = -1; j <= 1; j++)
-                            {
-                                for(int k = -1; k <= 1; k++)
-                                {
-                                    if (!IsInBounds(chunkToRender.ChunkBlockIDs, new Vector3Int(x + i, y + j, z + k)))      //Index is outside array bounds
-                                        continue;
-                                    if ((i*i) + (j*j) + (k*k) != 1)    //Bordering block is only bordering by its corner
-                                        continue;
-                                    if (chunkToRender.ChunkBlockIDs[x + i, y + j, z + k] != 0)  //Bordering block isn't air
-                                        continue;
-                                    faceID = (((int)((i + 1) * 1.5f)) * (i * i)) + (((int)((j + 1) * 1.5f)) + 1) * (j * j) + (((int)((k + 1) * 1.5f)) + 2) * (k * k);
-                                    faceTris = blockSides[blockID, faceID].triangles.ToArray();
-                                    tempVertices = new Vector3[faceTris.Length];
-                                    for(int f = 0; f < faceTris.Length; f++)
-                                    {
-                                        tempVertices[f] = ((GameObject)blocks[blockID]).GetComponent<MeshFilter>().sharedMesh.vertices[faceTris[f]];
-                                        faceTris[f] = f;
-                                    }
-
-                                    Debug.Log(i + " ," + j + " ," + k + " - " + faceID);
-                                }
-                            }
-                        }*/
-/*                        int[] faceTris;
-                        Vector3[] tempVertices;
-                        if (chunkToRender.ChunkBlockIDs[x, y, z] != 0)
-                        {
-                            faceTris = blockSides[chunkToRender.ChunkBlockIDs[x, y, z] - 1, 4].triangles.ToArray();
-                            tempVertices = new Vector3[faceTris.Length];
-                            GameObject cubeFace = new GameObject();
-                            Mesh faceMesh = new Mesh();
-
-                            cubeFace.name = "Face";
-                            cubeFace.transform.parent = g.transform;
-                            cubeFace.transform.localPosition = new Vector3(x - (chunkToRender.ChunkBlockIDs.GetLength(0) / 2), y - (chunkToRender.ChunkBlockIDs.GetLength(1) / 2), z - (chunkToRender.ChunkBlockIDs.GetLength(2) / 2));
-                            cubeFace.AddComponent<MeshFilter>();
-                            cubeFace.AddComponent<MeshRenderer>();
-                            cubeFace.GetComponent<MeshRenderer>().material = ((GameObject)blocks[chunkToRender.ChunkBlockIDs[x, y, z] - 1]).GetComponent<MeshRenderer>().sharedMaterial;
-                            for (int j = 0; j < faceTris.Length; j++)
-                            {
-                                tempVertices[j] = ((GameObject)blocks[chunkToRender.ChunkBlockIDs[x, y, z] - 1]).GetComponent<MeshFilter>().sharedMesh.vertices[faceTris[j]];
-                                faceTris[j] = j;
-                            }
-                            faceMesh.vertices = tempVertices;
-                            faceMesh.triangles = faceTris;
-                            faceMesh.RecalculateNormals();
-                            cubeFace.GetComponent<MeshFilter>().mesh = faceMesh;
-                        }*/
                     }
                 }
             }
@@ -233,13 +176,5 @@ public class BlockRenderer : MonoBehaviour
                 }
             }
         }
-    }
-    bool IsInBounds(int[,,] arrayToCheck, Vector3Int positionToCheck)
-    {
-        bool result = false;
-        result = (positionToCheck.x >= 0 && positionToCheck.x < arrayToCheck.GetLength(0)) &&
-                (positionToCheck.y >= 0 && positionToCheck.y < arrayToCheck.GetLength(1)) &&
-                (positionToCheck.z >= 0 && positionToCheck.z < arrayToCheck.GetLength(2));
-        return result;
     }
 }

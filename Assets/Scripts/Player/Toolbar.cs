@@ -83,7 +83,7 @@ public class Toolbar : MonoBehaviour
         }
         for (int i = 0; i < placeableBlockIDs.Length; i++)
         {
-            tempTexture = RuntimePreviewGenerator.GenerateModelPreview(((GameObject)playerBlockRenderer.Blocks[placeableBlockIDs[i]-1]).transform);
+            tempTexture = RuntimePreviewGenerator.GenerateModelPreview(((GameObject)playerBlockRenderer.Blocks[placeableBlockIDs[i]-1]).transform,256,256);
             blockThumbnails[i].sprite = Sprite.Create(tempTexture, new Rect(0, 0, tempTexture.width, tempTexture.height), new Vector2(tempTexture.width / 2, tempTexture.height / 2));
         }
     }
