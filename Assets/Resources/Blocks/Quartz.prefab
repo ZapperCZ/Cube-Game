@@ -99,7 +99,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ID: 6
   Name: Quartz
-  TimeToBreak: 2000
+  TimeToBreak: 1500
 --- !u!65 &-4757237722658661359
 BoxCollider:
   m_ObjectHideFlags: 0

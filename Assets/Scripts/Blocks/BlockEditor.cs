@@ -32,16 +32,19 @@ public class BlockEditor : MonoBehaviour
     void Update()
     {
         if (!Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, playerReach, blockLayer)) //No blocks within reach
+        {
+            if (lastViewedBlock != null)
+                lastViewedBlock.GetComponent<MeshRenderer>().material.color = originalBlockColor;
             return;
+        }
         ViewedBlockInfo = chunkManagerInstance.GetBlockAtPosition(hit.point + (hit.normal * offset * -1));
-        Debug.Log(chunkManagerInstance.ActiveChunks.Count-1 + " - " + ViewedBlockInfo[0]);
         viewedBlockID = chunkManagerInstance.ActiveChunks[ViewedBlockInfo[0]].ChunkBlockIDs[ViewedBlockInfo[1], ViewedBlockInfo[2], ViewedBlockInfo[3]];
 
         if (viewedBlockID != 0 &&(
             targetBlockInfo[0] != ViewedBlockInfo[0] ||
             targetBlockInfo[1] != ViewedBlockInfo[1] ||
             targetBlockInfo[2] != ViewedBlockInfo[2] ||
-            targetBlockInfo[3] != ViewedBlockInfo[3]))      //The block being broken changed
+            targetBlockInfo[3] != ViewedBlockInfo[3]))      //The block being targetted changed
         {
             //Color highlight
             if (targetBlockID != 0 && lastViewedBlock != null)
@@ -96,6 +99,8 @@ public class BlockEditor : MonoBehaviour
     }
     void PlaceBlock()
     {
+        if (chunkManagerInstance.ActiveChunks[targetBlockInfo[0]].ChunkBlockIDs[targetBlockInfo[1], targetBlockInfo[2], targetBlockInfo[3]] != 0)
+            return;
         chunkManagerInstance.ActiveChunks[targetBlockInfo[0]].ChunkBlockIDs[targetBlockInfo[1], targetBlockInfo[2], targetBlockInfo[3]] = selectedBlockID;
         chunkManagerInstance.ChunksToGenerate.Add(affectedChunk);
     }

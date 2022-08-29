@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Player_MouseLook : MonoBehaviour
 {
-    [Range(10f, 1000f)]
+    [Range(1f, 100f)]
     [SerializeField] float sensitivity = 100f;
     [SerializeField] Transform Camera;
     float horizontal, vertical;
@@ -18,8 +18,8 @@ public class Player_MouseLook : MonoBehaviour
 
     void Update()
     {
-        horizontal = Input.GetAxis("Mouse X") * sensitivity * Time.deltaTime;
-        vertical = Input.GetAxis("Mouse Y") * sensitivity * Time.deltaTime;
+        horizontal = Input.GetAxis("Mouse X") * sensitivity;
+        vertical = Input.GetAxis("Mouse Y") * sensitivity;
 
         xRotation -= vertical;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
