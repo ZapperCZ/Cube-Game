@@ -35,38 +35,41 @@ public class BlockEditor : MonoBehaviour
             return;
         ViewedBlockInfo = chunkManagerInstance.GetBlockAtPosition(hit.point + (hit.normal * offset * -1));
         viewedBlockID = chunkManagerInstance.ActiveChunks[ViewedBlockInfo[0]].ChunkBlockIDs[ViewedBlockInfo[1], ViewedBlockInfo[2], ViewedBlockInfo[3]];
-        
-        if (Input.GetButton("Left Click") && viewedBlockID!=0)
-        {
-            if (targetBlockInfo[0] != ViewedBlockInfo[0] ||
-                targetBlockInfo[1] != ViewedBlockInfo[1] ||
-                targetBlockInfo[2] != ViewedBlockInfo[2] ||
-                targetBlockInfo[3] != ViewedBlockInfo[3])      //The block being broken changed
-            {
-                //Color highlight
-                if (targetBlockID != 0 && lastViewedBlock != null)
-                {
-                    lastViewedBlock.GetComponent<MeshRenderer>().material.color = originalBlockColor;
-                }
-                lastViewedBlock = hit.transform.gameObject;
-                //Copy the color values manually to avoid creating a reference to the original which gets altered later
-                originalBlockColor.a = lastViewedBlock.GetComponent<MeshRenderer>().material.color.a;
-                originalBlockColor.r = lastViewedBlock.GetComponent<MeshRenderer>().material.color.r;
-                originalBlockColor.g = lastViewedBlock.GetComponent<MeshRenderer>().material.color.g;
-                originalBlockColor.b = lastViewedBlock.GetComponent<MeshRenderer>().material.color.b;
 
-                targetBlockInfo = ViewedBlockInfo;
-                targetBlockID = viewedBlockID;
-                timeTobreak = ((GameObject)playerBlockRenderer.Blocks[targetBlockID - 1]).GetComponent<BlockProperties>().TimeToBreak / 1000;
-                affectedChunk = chunkManagerInstance.ActiveChunks[targetBlockInfo[0]];
-                timer = 0;
+        if (viewedBlockID != 0 &&(
+            targetBlockInfo[0] != ViewedBlockInfo[0] ||
+            targetBlockInfo[1] != ViewedBlockInfo[1] ||
+            targetBlockInfo[2] != ViewedBlockInfo[2] ||
+            targetBlockInfo[3] != ViewedBlockInfo[3]))      //The block being broken changed
+        {
+            //Color highlight
+            if (targetBlockID != 0 && lastViewedBlock != null)
+            {
+                lastViewedBlock.GetComponent<MeshRenderer>().material.color = originalBlockColor;
             }
+            lastViewedBlock = hit.transform.gameObject;
+            //Copy the color values manually to avoid creating a reference to the original which gets altered later
+            //originalBlockColor.a = lastViewedBlock.GetComponent<MeshRenderer>().material.color.a;
+            originalBlockColor.r = lastViewedBlock.GetComponent<MeshRenderer>().material.color.r;
+            originalBlockColor.g = lastViewedBlock.GetComponent<MeshRenderer>().material.color.g;
+            originalBlockColor.b = lastViewedBlock.GetComponent<MeshRenderer>().material.color.b;
+
+            targetBlockInfo = ViewedBlockInfo;
+            targetBlockID = viewedBlockID;
+            timeTobreak = ((GameObject)playerBlockRenderer.Blocks[targetBlockID - 1]).GetComponent<BlockProperties>().TimeToBreak / 1000;
+            affectedChunk = chunkManagerInstance.ActiveChunks[targetBlockInfo[0]];
+            timer = 0;
+        }
+        r = originalBlockColor.r + 0.05f;
+        g = originalBlockColor.g + 0.05f;
+        b = originalBlockColor.b + 0.05f;
+        if (Input.GetButton("Left Click"))
+        {
             if (lastViewedBlock != null)
             {
                 r = originalBlockColor.r + (Color.red.r - originalBlockColor.r) * (timer / timeTobreak);
                 g = originalBlockColor.g + (Color.red.g - originalBlockColor.g) * (timer / timeTobreak);
                 b = originalBlockColor.b + (Color.red.b - originalBlockColor.b) * (timer / timeTobreak);
-                lastViewedBlock.GetComponent<MeshRenderer>().material.color = new Color(r, g, b);
             }
             timer += Time.deltaTime;
             if (timer > timeTobreak)
@@ -87,6 +90,7 @@ public class BlockEditor : MonoBehaviour
             PlaceBlock();
             targetBlockInfo = new int[4];
         }
+        lastViewedBlock.GetComponent<MeshRenderer>().material.color = new Color(r, g, b);
     }
     void PlaceBlock()
     {
