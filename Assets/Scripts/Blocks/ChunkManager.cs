@@ -132,13 +132,14 @@ public class ChunkManager : MonoBehaviour
     {
         return chunks.IndexOf(chunk);
     }
-    public Chunk GetChunkAtPosition(Vector3 position)  //Returns the chunk that is closest to the input position
+    public Chunk GetChunkAtPosition(Vector3 position, bool mustBeActive = false)  //Returns the chunk that is closest to the input position
     {
         Chunk closestChunk = null;
         position += new Vector3(0.5f, 0, 0.5f);     //Introduce 0.5 offset because a block has it's center at 0,0 and it's border at 0.5,0.5
         float currentDistance, lastDistance;
         lastDistance = float.MaxValue;
-        foreach (Chunk c in chunks)
+        Chunk[] chunksToIterate = mustBeActive ? ActiveChunks.ToArray() : chunks.ToArray();
+        foreach (Chunk c in chunksToIterate)
         {
             currentDistance = Vector3.Distance(position, c.ChunkPosition);      //cache the calculated distance to offload work from the cpu
             if (currentDistance < lastDistance)
@@ -153,17 +154,17 @@ public class ChunkManager : MonoBehaviour
     {
         int[] result = new int[4];
 
-        int blockChunkID = chunks.IndexOf(GetChunkAtPosition(position));    //ID of the chunk that the block is in
+        int blockChunkID = ActiveChunks.IndexOf(GetChunkAtPosition(position, true));      //ID of the chunk that the block is in
 
-        Vector3 localPosition = position - chunks[blockChunkID].ChunkPosition;
+        Vector3 localPosition = position - ActiveChunks[blockChunkID].ChunkPosition;
 
-        int blockX = Mathf.RoundToInt(localPosition.x) + (chunks[blockChunkID].ChunkBlockIDs.GetLength(0) / 2);
-        int blockY = Mathf.RoundToInt(localPosition.y) + (chunks[blockChunkID].ChunkBlockIDs.GetLength(1) / 2);
-        int blockZ = Mathf.RoundToInt(localPosition.z) + (chunks[blockChunkID].ChunkBlockIDs.GetLength(2) / 2);
+        int blockX = Mathf.RoundToInt(localPosition.x) + (ActiveChunks[blockChunkID].ChunkBlockIDs.GetLength(0) / 2);
+        int blockY = Mathf.RoundToInt(localPosition.y) + (ActiveChunks[blockChunkID].ChunkBlockIDs.GetLength(1) / 2);
+        int blockZ = Mathf.RoundToInt(localPosition.z) + (ActiveChunks[blockChunkID].ChunkBlockIDs.GetLength(2) / 2);
 
-        if (!IsInBounds(chunks[blockChunkID].ChunkBlockIDs,new Vector3Int(blockX, blockY, blockZ)))
+        if (!IsInBounds(ActiveChunks[blockChunkID].ChunkBlockIDs,new Vector3Int(blockX, blockY, blockZ)))
         {
-            Vector3Int inBounds = PutInBounds(chunks[blockChunkID].ChunkBlockIDs, new Vector3Int(blockX, blockY, blockZ));
+            Vector3Int inBounds = PutInBounds(ActiveChunks[blockChunkID].ChunkBlockIDs, new Vector3Int(blockX, blockY, blockZ));
             blockX = inBounds.x;
             blockY = inBounds.y;
             blockZ = inBounds.z;

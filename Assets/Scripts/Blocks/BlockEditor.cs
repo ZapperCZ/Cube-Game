@@ -34,6 +34,7 @@ public class BlockEditor : MonoBehaviour
         if (!Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, playerReach, blockLayer)) //No blocks within reach
             return;
         ViewedBlockInfo = chunkManagerInstance.GetBlockAtPosition(hit.point + (hit.normal * offset * -1));
+        Debug.Log(chunkManagerInstance.ActiveChunks.Count-1 + " - " + ViewedBlockInfo[0]);
         viewedBlockID = chunkManagerInstance.ActiveChunks[ViewedBlockInfo[0]].ChunkBlockIDs[ViewedBlockInfo[1], ViewedBlockInfo[2], ViewedBlockInfo[3]];
 
         if (viewedBlockID != 0 &&(
@@ -90,7 +91,8 @@ public class BlockEditor : MonoBehaviour
             PlaceBlock();
             targetBlockInfo = new int[4];
         }
-        lastViewedBlock.GetComponent<MeshRenderer>().material.color = new Color(r, g, b);
+        if(lastViewedBlock != null)
+            lastViewedBlock.GetComponent<MeshRenderer>().material.color = new Color(r, g, b);
     }
     void PlaceBlock()
     {
