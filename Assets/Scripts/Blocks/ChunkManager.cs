@@ -7,7 +7,6 @@ public class ChunkManager : MonoBehaviour
 
     [SerializeField] float chunkUpdateInterval = 5;             //How often should the ActiveChunk list be updated (in seconds)
     [SerializeField] int renderDistance = 6;                    //How many chunks should render near the player - number determines how many chunks away the player can see
-    [SerializeField] GameObject DebugBlock;
     [SerializeField] GameObject Player;                         //The active player character
     List<Chunk> chunks = new List<Chunk>();                      //List of all chunks in the level
     public List<Chunk> ActiveChunks = new List<Chunk>();        //List of all the currently loaded chunks
